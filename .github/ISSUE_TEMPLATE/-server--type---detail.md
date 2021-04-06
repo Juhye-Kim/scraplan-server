@@ -1,7 +1,7 @@
 ---
 name: "[Server] Type / Detail"
 about: Describe this issue template's purpose here.
-title: ''
+title: "[Server] Type/Detail"
 labels: ''
 assignees: ''
 
