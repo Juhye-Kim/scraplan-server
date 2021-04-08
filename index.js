@@ -2,6 +2,7 @@ const https = require("https");
 const fs = require("fs");
 const express = require("express");
 const cors = require("cors");
+require("dotenv").config();
 const app = express();
 
 //express 미들웨어 설정
