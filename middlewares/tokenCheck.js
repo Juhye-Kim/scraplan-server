@@ -1,0 +1,66 @@
+const jwt = require("jsonwebtoken");
+const { User } = require("../models");
+
+module.exports = async (req, res, next) => {
+  const { authorization } = req.headers;
+  const { email } = req.body;
+
+  if (!authorization || !email) {
+    return res.status(400).json({ message: "Insufficient info" });
+  }
+
+  const bearer = authorization.split(" ");
+
+  if (bearer[0] === "Bearer") {
+    try {
+      const authData = jwt.verify(bearer[1], process.env.ACCESS_SECRET);
+
+      if (authData.nickname === undefined || authData.id === undefined) {
+        //not our token format
+        return res.status(401).send();
+      }
+      const userInfo = await User.findOne({
+        where: {
+          email,
+        },
+      });
+
+      if (
+        userInfo &&
+        userInfo.nickname === authData.nickname &&
+        userInfo.id === authData.id &&
+        userInfo.latestToken === bearer[1]
+      ) {
+        req.authData = userInfo;
+        next();
+        return;
+      } else if (userInfo.latestToken !== bearer[1]) {
+        //다른 곳에서 로그인하여 기존 토큰이 무효화되었을 때.
+        return res.status(403).json({ message: "Expired token" });
+      } else {
+        //조회되는 유저가 없거나 토큰의 내용과 조회한 데이터가 불일치 할 때
+        return res.status(401).json({ message: "Wrong access" });
+      }
+    } catch (err) {
+      switch (err.message) {
+        case "jwt expired":
+          res.status(401).json({ message: "Expired token" });
+          break;
+        case "invalid token":
+          res.status(401).json({ message: "Invalid token" });
+          break;
+        default:
+          console.log(
+            "---------------------------------Error occurred in tokenCheck.js---------------------------------",
+            err,
+            "---------------------------------Error occurred in tokenCheck.js---------------------------------"
+          );
+          res.status(500).json({ message: "Something wrong in server" });
+          break;
+      }
+      return;
+    }
+  } else {
+    return res.status(400).json({ message: "Insufficient info" });
+  }
+};

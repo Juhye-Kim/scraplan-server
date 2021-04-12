@@ -1,5 +1,6 @@
 "use strict";
 const { Model } = require("sequelize");
+const bcrypt = require("bcrypt");
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     /**
@@ -7,6 +8,12 @@ module.exports = (sequelize, DataTypes) => {
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
+    updatePassword(password) {
+      this.password = bcrypt.hashSync(password.toString(), 10);
+    }
+    validPassword(password) {
+      return bcrypt.compareSync(password.toString(), this.password);
+    }
     static associate(models) {
       // define association here
       models.User.hasMany(models.CurationFeedback, {
@@ -29,6 +36,13 @@ module.exports = (sequelize, DataTypes) => {
       latestToken: DataTypes.STRING,
     },
     {
+      hooks: {
+        beforeCreate: (user) => {
+          if (user.password !== "" && user.password) {
+            user.password = bcrypt.hashSync(user.password.toString(), 10);
+          }
+        },
+      },
       sequelize,
       modelName: "User",
     }
