@@ -1,14 +1,7 @@
 const jwt = require("jsonwebtoken");
 const { User } = require("../models");
 
-module.exports = async (req, res, next) => {
-  const { authorization } = req.headers;
-  const { email } = req.body;
-
-  if (!authorization || !email) {
-    return res.status(400).json({ message: "Insufficient info" });
-  }
-
+module.exports = async (req, res, next, authorization, email) => {
   const bearer = authorization.split(" ");
 
   if (bearer[0] === "Bearer") {
@@ -38,8 +31,10 @@ module.exports = async (req, res, next) => {
         //조회되는 유저가 없는 경우
         return res.status(401).json({ message: "Wrong access" });
       } else if (userInfo.latestToken !== bearer[1]) {
-        //다른 곳에서 로그인하여 기존 토큰이 무효화되었을 때.
-        return res.status(403).json({ message: "Expired token" });
+        //다른 곳에서 로그인하여 기존 토큰이 무효화되었을 때 혹은 토큰과 이메일의 정보가 일치하지 않을 떄
+        return res
+          .status(403)
+          .json({ message: "Expired token or Not matched inform" });
       }
     } catch (err) {
       switch (err.message) {
