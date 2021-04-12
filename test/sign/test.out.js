@@ -81,12 +81,15 @@ describe("🔥PATCH /sign/out", () => {
       .end((err, res) => {
         res.should.have.status(200);
         res.body.should.have.property("message").eql("Successfully logouted");
-        done();
-      });
-  });
 
-  it("check logout request was delete accessToken", async () => {
-    const userInfo = await User.findOne({ where: { email } });
-    userInfo.should.property("latestToken").is.null;
+        User.findOne({ where: { email } })
+          .then((userInfo) => {
+            userInfo.should.property("latestToken").is.null;
+            done();
+          })
+          .catch((err) => {
+            done(err);
+          });
+      });
   });
 });

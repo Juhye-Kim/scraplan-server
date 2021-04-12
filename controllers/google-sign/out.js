@@ -9,9 +9,9 @@ module.exports = async (req, res) => {
     res.status(200).json({ message: "Successfully logouted" });
   } catch (err) {
     console.log(
-      "---------------------------------Error occurred in sign/out.js---------------------------------",
+      "---------------------------------Error occurred in google-sign/out.js---------------------------------",
       err,
-      "---------------------------------Error occurred in sign/out.js---------------------------------"
+      "---------------------------------Error occurred in google-sign/out.js---------------------------------"
     );
     res.status(500).send();
   }
