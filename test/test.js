@@ -6,3 +6,5 @@ require("./google-sign/test.up");
 require("./google-sign/test.in");
 require("./google-sign/test.out");
 require("./google-sign/test.withdraw");
+require("./user/test.info");
+require("./user/test.editInfo");

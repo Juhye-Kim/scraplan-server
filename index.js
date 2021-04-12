@@ -18,12 +18,14 @@ app.use(
 //express 라우팅
 const signRouter = require("./routers/sign");
 const googleSignRouter = require("./routers/google-sign");
+const userRouter = require("./routers/user");
 
 app.get("/", (req, res) => {
   res.send("Scraplan server connected");
 });
 app.use("/sign", signRouter);
 app.use("/google-sign", googleSignRouter);
+app.use("/user", userRouter);
 
 //HTTPS 서버 여는 코드
 const ca = fs.readFileSync(process.env.SSL_CA);
