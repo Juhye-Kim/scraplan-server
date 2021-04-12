@@ -14,6 +14,9 @@ module.exports = (sequelize, DataTypes) => {
     validPassword(password) {
       return bcrypt.compareSync(password.toString(), this.password);
     }
+    validGoogleData(googleData) {
+      return bcrypt.compareSync(googleData.toString(), this.googleData);
+    }
     static associate(models) {
       // define association here
       models.User.hasMany(models.CurationFeedback, {
@@ -41,6 +44,8 @@ module.exports = (sequelize, DataTypes) => {
           if (user.password !== "" && user.password) {
             user.password = bcrypt.hashSync(user.password.toString(), 10);
           }
+          if (user.googleData)
+            user.googleData = bcrypt.hashSync(user.googleData.toString(), 10);
         },
       },
       sequelize,

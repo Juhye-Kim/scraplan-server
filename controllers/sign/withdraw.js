@@ -21,6 +21,4 @@ module.exports = async (req, res) => {
     );
     res.status(500).send();
   }
-
-  res.status(500).send();
 };

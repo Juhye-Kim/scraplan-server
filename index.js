@@ -15,9 +15,15 @@ app.use(
   })
 );
 
+//express 라우팅
+const signRouter = require("./routers/sign");
+const googleSignRouter = require("./routers/google-sign");
+
 app.get("/", (req, res) => {
-  res.send("MySurpin server connected");
+  res.send("Scraplan server connected");
 });
+app.use("/sign", signRouter);
+app.use("/google-sign", googleSignRouter);
 
 //HTTPS 서버 여는 코드
 const ca = fs.readFileSync(process.env.SSL_CA);
@@ -40,3 +46,5 @@ if (ca && key && cert) {
 } else {
   console.log("key's location is not exists");
 }
+
+module.exports = app;

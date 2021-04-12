@@ -11,7 +11,6 @@ describe("🔥PATCH /sign/in", () => {
   const email = "test@test.com",
     nickname = "yubin-j",
     password = 1234;
-  let accessToken;
 
   before(async () => {
     await User.destroy({
@@ -65,18 +64,19 @@ describe("🔥PATCH /sign/in", () => {
       .end((err, res) => {
         res.should.have.status(200);
         res.body.should.have.property("accessToken");
-        accessToken = res.body.accessToken;
-        done();
+
+        User.findOne({
+          where: { email },
+          raw: true,
+        })
+          .then((userInfo) => {
+            userInfo.latestToken.should.eql(res.body.accessToken);
+            done();
+          })
+          .catch((err) => {
+            done(err);
+          });
       });
-  });
-  it("compare access token from request with db", (done) => {
-    User.findOne({
-      where: { email },
-      raw: true,
-    }).then((userInfo) => {
-      userInfo.latestToken.should.eql(accessToken);
-      done();
-    });
   });
   it("check ignore incorrect password", (done) => {
     const req = {
