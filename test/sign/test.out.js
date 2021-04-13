@@ -1,11 +1,9 @@
 const { User } = require("../../models");
 
 const chai = require("chai");
-const chaiHttp = require("chai-http");
-const server = require("../../index");
-const should = chai.should();
+const reqFunc = require("../util/reqFunc");
 
-chai.use(chaiHttp);
+chai.should();
 
 describe("🔥PATCH /sign/out", () => {
   const email = "test@test.com",
@@ -24,72 +22,49 @@ describe("🔥PATCH /sign/out", () => {
     });
   });
   it("get access token", (done) => {
-    chai
-      .request(server)
-      .patch("/sign/in")
-      .send({
-        email,
-        password,
-      })
-      .end((err, res) => {
-        accessToken = res.body.accessToken;
-        done();
-      });
+    reqFunc("/sign/in", "patch", { email, password }, (err, res) => {
+      accessToken = res.body.accessToken;
+      done();
+    });
   });
 
   it("check authorization requred", (done) => {
     const req = {
       email: "test@test.com",
     };
-
-    chai
-      .request(server)
-      .patch("/sign/out")
-      .send(req)
-      .end((err, res) => {
-        res.should.have.status(400);
-        res.body.should.have.property("message").eql("Insufficient info");
-        done();
-      });
+    reqFunc("/sign/out", "patch", req, (err, res) => {
+      res.should.have.status(400);
+      res.body.should.have.property("message").eql("Insufficient info");
+      done();
+    });
   });
 
   it("check email requred", (done) => {
-    const req = {};
-
-    chai
-      .request(server)
-      .patch("/sign/out")
-      .set({ authorization: `Bearer ${accessToken}` })
-      .send(req)
-      .end((err, res) => {
-        res.should.have.status(400);
-        res.body.should.have.property("message").eql("Insufficient info");
-        done();
-      });
+    const req = { accessToken };
+    reqFunc("/sign/out", "patch", req, (err, res) => {
+      res.should.have.status(400);
+      res.body.should.have.property("message").eql("Insufficient info");
+      done();
+    });
   });
 
   it("check logout success", (done) => {
     const req = {
       email: "test@test.com",
+      accessToken,
     };
+    reqFunc("/sign/out", "patch", req, (err, res) => {
+      res.should.have.status(200);
+      res.body.should.have.property("message").eql("Successfully logouted");
 
-    chai
-      .request(server)
-      .patch("/sign/out")
-      .set({ authorization: `Bearer ${accessToken}` })
-      .send(req)
-      .end((err, res) => {
-        res.should.have.status(200);
-        res.body.should.have.property("message").eql("Successfully logouted");
-
-        User.findOne({ where: { email } })
-          .then((userInfo) => {
-            userInfo.should.property("latestToken").is.null;
-            done();
-          })
-          .catch((err) => {
-            done(err);
-          });
-      });
+      User.findOne({ where: { email } })
+        .then((userInfo) => {
+          userInfo.should.property("latestToken").is.null;
+          done();
+        })
+        .catch((err) => {
+          done(err);
+        });
+    });
   });
 });

@@ -19,6 +19,7 @@ app.use(
 const signRouter = require("./routers/sign");
 const googleSignRouter = require("./routers/google-sign");
 const userRouter = require("./routers/user");
+const curationRouter = require("./routers/curation");
 
 app.get("/", (req, res) => {
   res.send("Scraplan server connected");
@@ -26,6 +27,8 @@ app.get("/", (req, res) => {
 app.use("/sign", signRouter);
 app.use("/google-sign", googleSignRouter);
 app.use("/user", userRouter);
+app.get("/curations", require("./controllers/curation").get);
+app.use("/curation", curationRouter);
 
 //HTTPS 서버 여는 코드
 const ca = fs.readFileSync(process.env.SSL_CA);

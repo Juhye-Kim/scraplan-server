@@ -2,46 +2,10 @@ const { User } = require("../../models");
 
 const nock = require("nock");
 const chai = require("chai");
-const chaiHttp = require("chai-http");
-const server = require("../../index");
 const { expect } = require("chai");
+const reqFunc = require("../util/reqFunc");
 
 chai.should();
-chai.use(chaiHttp);
-
-const reqFunc = (url, method, req, cb) => {
-  const { accessToken } = req;
-  if ("accessToken" in req) {
-    delete req.accessToken;
-  }
-  switch (method) {
-    case "post":
-      chai.request(server).post(url).send(req).end(cb);
-      break;
-    case "patch":
-      chai.request(server).patch(url).send(req).end(cb);
-      break;
-    case "patchWithAccessToken":
-      chai
-        .request(server)
-        .patch(url)
-        .set({ authorization: `Bearer ${accessToken}` })
-        .send(req)
-        .end(cb);
-      break;
-    case "getWithAccessToken":
-      chai
-        .request(server)
-        .get(url)
-        .set({ authorization: `Bearer ${accessToken}` })
-        .send()
-        .end(cb);
-      break;
-    case "get":
-      chai.request(server).get(url).send().end(cb);
-      break;
-  }
-};
 
 describe("🔥GET /user/info", () => {
   let accessToken,
@@ -109,23 +73,18 @@ describe("🔥GET /user/info", () => {
     const req = {
       accessToken,
     };
-    reqFunc(
-      `/user/info/1234@test.com`,
-      "getWithAccessToken",
-      req,
-      (err, res) => {
-        res.should.have.status(401);
-        res.body.should.have.property("message").eql("Wrong access");
-        done();
-      }
-    );
+    reqFunc(`/user/info/1234@test.com`, "get", req, (err, res) => {
+      res.should.have.status(401);
+      res.body.should.have.property("message").eql("Wrong access");
+      done();
+    });
   });
 
   it("check ignore wrong accessToken", (done) => {
     const req = {
       accessToken: "!!!!!",
     };
-    reqFunc(`/user/info/${email}`, "getWithAccessToken", req, (err, res) => {
+    reqFunc(`/user/info/${email}`, "get", req, (err, res) => {
       res.should.have.status(400);
       res.body.should.have.property("message").eql("Insufficient info");
       done();
@@ -146,7 +105,7 @@ describe("🔥GET /user/info", () => {
     const req = {
       accessToken,
     };
-    reqFunc(`/user/info/${email}`, "getWithAccessToken", req, (err, res) => {
+    reqFunc(`/user/info/${email}`, "get", req, (err, res) => {
       res.should.have.status(200);
       res.body.should.have.property("isValid").eql(true);
       res.body.should.have.property("email").eql(email);

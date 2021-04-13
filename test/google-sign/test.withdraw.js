@@ -2,36 +2,12 @@ const { User } = require("../../models");
 
 const nock = require("nock");
 const chai = require("chai");
-const chaiHttp = require("chai-http");
-const server = require("../../index");
 const { expect } = require("chai");
+const reqFunc = require("../util/reqFunc");
 
 chai.should();
-chai.use(chaiHttp);
 
 const url = "/google-sign/withdraw";
-const reqFunc = (url, method, req, cb) => {
-  switch (method) {
-    case "post":
-      chai.request(server).post(url).send(req).end(cb);
-      break;
-    case "patch":
-      chai.request(server).patch(url).send(req).end(cb);
-      break;
-    case "delete":
-      const { accessToken } = req;
-      if ("accessToken" in req) {
-        delete req.accessToken;
-      }
-      chai
-        .request(server)
-        .delete(url)
-        .set({ authorization: `Bearer ${accessToken}` })
-        .send(req)
-        .end(cb);
-      break;
-  }
-};
 
 describe("🔥DELETE /google-sign/withdraw", () => {
   let accessToken,
