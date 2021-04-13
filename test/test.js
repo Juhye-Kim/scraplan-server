@@ -8,3 +8,4 @@ require("./google-sign/test.out");
 require("./google-sign/test.withdraw");
 require("./user/test.info");
 require("./user/test.editInfo");
+require("./curation/test.get");

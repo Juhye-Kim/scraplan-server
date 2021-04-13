@@ -1,11 +1,9 @@
 const { User } = require("../../models");
 
 const chai = require("chai");
-const chaiHttp = require("chai-http");
-const server = require("../../index");
-const should = chai.should();
+const reqFunc = require("../util/reqFunc");
 
-chai.use(chaiHttp);
+chai.should();
 
 describe("🔥PATCH /sign/in", () => {
   const email = "test@test.com",
@@ -27,87 +25,67 @@ describe("🔥PATCH /sign/in", () => {
       email: "",
       password,
     };
-    chai
-      .request(server)
-      .patch("/sign/in")
-      .send(req)
-      .end((err, res) => {
-        res.should.have.status(400);
-        res.body.should.have.property("message").eql("Insufficient info");
-        done();
-      });
+    reqFunc("/sign/in", "patch", req, (err, res) => {
+      res.should.have.status(400);
+      res.body.should.have.property("message").eql("Insufficient info");
+      done();
+    });
   });
   it("check password required", (done) => {
     const req = {
       email,
       password: "",
     };
-    chai
-      .request(server)
-      .patch("/sign/in")
-      .send(req)
-      .end((err, res) => {
-        res.should.have.status(400);
-        res.body.should.have.property("message").eql("Insufficient info");
-        done();
-      });
+    reqFunc("/sign/in", "patch", req, (err, res) => {
+      res.should.have.status(400);
+      res.body.should.have.property("message").eql("Insufficient info");
+      done();
+    });
   });
   it("check successfully sign in", (done) => {
     const req = {
       email,
       password,
     };
-    chai
-      .request(server)
-      .patch("/sign/in")
-      .send(req)
-      .end((err, res) => {
-        res.should.have.status(200);
-        res.body.should.have.property("accessToken");
+    reqFunc("/sign/in", "patch", req, (err, res) => {
+      res.should.have.status(200);
+      res.body.should.have.property("accessToken");
 
-        User.findOne({
-          where: { email },
-          raw: true,
+      User.findOne({
+        where: { email },
+        raw: true,
+      })
+        .then((userInfo) => {
+          userInfo.latestToken.should.eql(res.body.accessToken);
+          done();
         })
-          .then((userInfo) => {
-            userInfo.latestToken.should.eql(res.body.accessToken);
-            done();
-          })
-          .catch((err) => {
-            done(err);
-          });
-      });
+        .catch((err) => {
+          done(err);
+        });
+    });
   });
   it("check ignore incorrect password", (done) => {
     const req = {
       email,
       password: "failed",
     };
-    chai
-      .request(server)
-      .patch("/sign/in")
-      .send(req)
-      .end((err, res) => {
-        res.should.have.status(401);
-        res.body.should.have.property("message").eql("Wrong password");
-        res.body.should.not.have.property("accessToken");
-        done();
-      });
+    reqFunc("/sign/in", "patch", req, (err, res) => {
+      res.should.have.status(401);
+      res.body.should.have.property("message").eql("Wrong password");
+      res.body.should.not.have.property("accessToken");
+      done();
+    });
   });
   it("check ignore none exists user", (done) => {
     const req = {
       email: "not@test.com",
       password,
     };
-    chai
-      .request(server)
-      .patch("/sign/in")
-      .send(req)
-      .end((err, res) => {
-        res.should.have.status(400);
-        res.body.should.have.property("message").eql("None exists user");
-        res.body.should.not.have.property("accessToken");
-        done();
-      });
+    reqFunc("/sign/in", "patch", req, (err, res) => {
+      res.should.have.status(400);
+      res.body.should.have.property("message").eql("None exists user");
+      res.body.should.not.have.property("accessToken");
+      done();
+    });
   });
 });

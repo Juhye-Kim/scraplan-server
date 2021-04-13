@@ -2,36 +2,11 @@ const { User } = require("../../models");
 
 const nock = require("nock");
 const chai = require("chai");
-const chaiHttp = require("chai-http");
-const server = require("../../index");
-const { expect } = require("chai");
+const reqFunc = require("../util/reqFunc");
 
 chai.should();
-chai.use(chaiHttp);
 
 const url = "/google-sign/out";
-const reqFunc = (url, method, req, cb) => {
-  switch (method) {
-    case "post":
-      chai.request(server).post(url).send(req).end(cb);
-      break;
-    case "patch":
-      chai.request(server).patch(url).send(req).end(cb);
-      break;
-    case "patchWithAccessToken":
-      const { accessToken } = req;
-      if ("accessToken" in req) {
-        delete req.accessToken;
-      }
-      chai
-        .request(server)
-        .patch(url)
-        .set({ authorization: `Bearer ${accessToken}` })
-        .send(req)
-        .end(cb);
-      break;
-  }
-};
 
 describe("🔥PATCH /google-sign/out", () => {
   let accessToken,
@@ -91,7 +66,7 @@ describe("🔥PATCH /google-sign/out", () => {
     const req = {
       accessToken,
     };
-    reqFunc(url, "patchWithAccessToken", req, (err, res) => {
+    reqFunc(url, "patch", req, (err, res) => {
       res.should.have.status(400);
       res.body.should.property("message").eql("Insufficient info");
       done();
@@ -102,7 +77,7 @@ describe("🔥PATCH /google-sign/out", () => {
     const req = {
       email,
     };
-    reqFunc(url, "patchWithAccessToken", req, (err, res) => {
+    reqFunc(url, "patch", req, (err, res) => {
       res.should.have.status(400);
       res.body.should.property("message").eql("Insufficient info");
       done();
@@ -114,7 +89,7 @@ describe("🔥PATCH /google-sign/out", () => {
       accessToken: "",
       email,
     };
-    reqFunc(url, "patchWithAccessToken", req, (err, res) => {
+    reqFunc(url, "patch", req, (err, res) => {
       res.should.have.status(400);
       res.body.should.property("message").eql("Insufficient info");
       done();
@@ -126,7 +101,7 @@ describe("🔥PATCH /google-sign/out", () => {
       accessToken,
       email,
     };
-    reqFunc(url, "patchWithAccessToken", req, (err, res) => {
+    reqFunc(url, "patch", req, (err, res) => {
       res.should.have.status(200);
       res.body.should.property("message").eql("Successfully logouted");
 

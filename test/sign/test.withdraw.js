@@ -1,12 +1,10 @@
 const { User } = require("../../models");
 
 const chai = require("chai");
-const chaiHttp = require("chai-http");
-const server = require("../../index");
-const should = chai.should();
 const { expect } = require("chai");
+const reqFunc = require("../util/reqFunc");
 
-chai.use(chaiHttp);
+chai.should();
 
 describe("🔥DELETE /sign/withdraw", () => {
   const email = "test@test.com",
@@ -25,89 +23,65 @@ describe("🔥DELETE /sign/withdraw", () => {
     });
   });
   it("get access token", (done) => {
-    chai
-      .request(server)
-      .patch("/sign/in")
-      .send({
-        email,
-        password,
-      })
-      .end((err, res) => {
-        accessToken = res.body.accessToken;
-        done();
-      });
+    reqFunc("/sign/in", "patch", { email, password }, (err, res) => {
+      accessToken = res.body.accessToken;
+      done();
+    });
   });
 
   it("check authorization requred", (done) => {
     const req = {
       email: "test@test.com",
     };
-
-    chai
-      .request(server)
-      .delete("/sign/withdraw")
-      .send(req)
-      .end((err, res) => {
-        res.should.have.status(400);
-        res.body.should.have.property("message").eql("Insufficient info");
-        done();
-      });
+    reqFunc("/sign/withdraw", "delete", req, (err, res) => {
+      res.should.have.status(400);
+      res.body.should.have.property("message").eql("Insufficient info");
+      done();
+    });
   });
 
   it("check email requred", (done) => {
     const req = {
       password,
+      accessToken,
     };
-
-    chai
-      .request(server)
-      .delete("/sign/withdraw")
-      .set({ authorization: `Bearer ${accessToken}` })
-      .send(req)
-      .end((err, res) => {
-        res.should.have.status(400);
-        res.body.should.have.property("message").eql("Insufficient info");
-        done();
-      });
+    reqFunc("/sign/withdraw", "delete", req, (err, res) => {
+      res.should.have.status(400);
+      res.body.should.have.property("message").eql("Insufficient info");
+      done();
+    });
   });
 
   it("check password requred", (done) => {
     const req = {
       email,
+      accessToken,
     };
-
-    chai
-      .request(server)
-      .delete("/sign/withdraw")
-      .set({ authorization: `Bearer ${accessToken}` })
-      .send(req)
-      .end((err, res) => {
-        res.should.have.status(400);
-        res.body.should.have.property("message").eql("Insufficient info");
-        done();
-      });
+    reqFunc("/sign/withdraw", "delete", req, (err, res) => {
+      res.should.have.status(400);
+      res.body.should.have.property("message").eql("Insufficient info");
+      done();
+    });
   });
 
   it("check withdraw success", (done) => {
     const req = {
       email,
       password,
+      accessToken,
     };
+    reqFunc("/sign/withdraw", "delete", req, (err, res) => {
+      res.should.have.status(200);
+      res.body.should.have.property("message").eql("Successfully processed");
 
-    chai
-      .request(server)
-      .delete("/sign/withdraw")
-      .set({ authorization: `Bearer ${accessToken}` })
-      .send(req)
-      .end((err, res) => {
-        res.should.have.status(200);
-        res.body.should.have.property("message").eql("Successfully processed");
-        done();
-      });
-  });
-
-  it("check withdraw request was delete user", async () => {
-    const userInfo = await User.findOne({ where: { email } });
-    expect(userInfo).to.be.null;
+      User.findOne({ where: { email } })
+        .then((userInfo) => {
+          expect(userInfo).to.be.null;
+          done();
+        })
+        .catch((err) => {
+          done(err);
+        });
+    });
   });
 });

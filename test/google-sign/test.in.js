@@ -2,23 +2,11 @@ const { User } = require("../../models");
 
 const nock = require("nock");
 const chai = require("chai");
-const chaiHttp = require("chai-http");
-const server = require("../../index");
 
 chai.should();
-chai.use(chaiHttp);
 
 const url = "/google-sign/in";
-const reqFunc = (url, method, req, cb) => {
-  switch (method) {
-    case "post":
-      chai.request(server).post(url).send(req).end(cb);
-      break;
-    case "patch":
-      chai.request(server).patch(url).send(req).end(cb);
-      break;
-  }
-};
+const reqFunc = require("../util/reqFunc");
 
 describe("🔥PATCH /google-sign/in", () => {
   const email = "testGoogle1@test.com",

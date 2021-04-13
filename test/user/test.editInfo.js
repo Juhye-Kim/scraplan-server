@@ -2,35 +2,10 @@ const { User } = require("../../models");
 
 const nock = require("nock");
 const chai = require("chai");
-const chaiHttp = require("chai-http");
-const server = require("../../index");
 const { expect } = require("chai");
+const reqFunc = require("../util/reqFunc");
 
 chai.should();
-chai.use(chaiHttp);
-
-const reqFunc = (url, method, req, cb) => {
-  const { accessToken } = req;
-  if ("accessToken" in req) {
-    delete req.accessToken;
-  }
-  switch (method) {
-    case "post":
-      chai.request(server).post(url).send(req).end(cb);
-      break;
-    case "patch":
-      chai.request(server).patch(url).send(req).end(cb);
-      break;
-    case "patchWithAccessToken":
-      chai
-        .request(server)
-        .patch(url)
-        .set({ authorization: `Bearer ${accessToken}` })
-        .send(req)
-        .end(cb);
-      break;
-  }
-};
 
 describe("🔥PATCH /user/edit-info", () => {
   let accessToken,
@@ -111,7 +86,7 @@ describe("🔥PATCH /user/edit-info", () => {
       password: "test",
     };
 
-    reqFunc("/user/edit-info", "patchWithAccessToken", req, (err, res) => {
+    reqFunc("/user/edit-info", "patch", req, (err, res) => {
       res.should.have.status(400);
       res.body.should.have.property("message").eql("Insufficient info");
       done();
@@ -126,7 +101,7 @@ describe("🔥PATCH /user/edit-info", () => {
       password: "test",
     };
 
-    reqFunc("/user/edit-info", "patchWithAccessToken", req, (err, res) => {
+    reqFunc("/user/edit-info", "patch", req, (err, res) => {
       res.should.have.status(403);
       res.body.should.have
         .property("message")
@@ -141,7 +116,7 @@ describe("🔥PATCH /user/edit-info", () => {
       email,
     };
 
-    reqFunc("/user/edit-info", "patchWithAccessToken", req, (err, res) => {
+    reqFunc("/user/edit-info", "patch", req, (err, res) => {
       res.should.have.status(400);
       res.body.should.have.property("message").eql("Insufficient info");
       done();
@@ -155,7 +130,7 @@ describe("🔥PATCH /user/edit-info", () => {
       password: "changedNick",
     };
 
-    reqFunc("/user/edit-info", "patchWithAccessToken", req, (err, res) => {
+    reqFunc("/user/edit-info", "patch", req, (err, res) => {
       res.should.have.status(200);
       res.body.should.have.property("accessToken");
       accessToken = res.body.accessToken;
@@ -179,7 +154,7 @@ describe("🔥PATCH /user/edit-info", () => {
       nickname: "changedNick",
     };
 
-    reqFunc("/user/edit-info", "patchWithAccessToken", req, (err, res) => {
+    reqFunc("/user/edit-info", "patch", req, (err, res) => {
       res.should.have.status(200);
       res.body.should.have.property("accessToken");
 

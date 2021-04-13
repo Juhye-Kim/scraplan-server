@@ -2,16 +2,11 @@ const { User } = require("../../models");
 
 const nock = require("nock");
 const chai = require("chai");
-const chaiHttp = require("chai-http");
-const server = require("../../index");
-const should = chai.should();
+const reqFunc = require("../util/reqFunc");
 
-chai.use(chaiHttp);
+chai.should();
 
 const url = "/google-sign/up";
-const reqFunc = (req, cb) => {
-  chai.request(server).post(url).send(req).end(cb);
-};
 
 describe("🔥POST /google-sign/up", () => {
   before(async () => {
@@ -59,7 +54,7 @@ describe("🔥POST /google-sign/up", () => {
     const req = {
       nickname: "yubin-j-google",
     };
-    reqFunc(req, (err, res) => {
+    reqFunc(url, "post", req, (err, res) => {
       res.should.have.status(400);
       res.body.should.have.property("message").eql("Insufficient info");
       done();
@@ -69,7 +64,7 @@ describe("🔥POST /google-sign/up", () => {
     const req = {
       hashData: "#access_token=temp-access-token",
     };
-    reqFunc(req, (err, res) => {
+    reqFunc(url, "post", req, (err, res) => {
       res.should.have.status(400);
       res.body.should.have.property("message").eql("Insufficient info");
       done();
@@ -80,7 +75,7 @@ describe("🔥POST /google-sign/up", () => {
       hashData: "test value",
       nickname: "",
     };
-    reqFunc(req, (err, res) => {
+    reqFunc(url, "post", req, (err, res) => {
       res.should.have.status(400);
       res.body.should.have.property("message").eql("Insufficient info");
       done();
@@ -92,7 +87,7 @@ describe("🔥POST /google-sign/up", () => {
       hashData: "#access_token=temp-access-token",
       nickname: "yubin-j-google",
     };
-    reqFunc(req, (err, res) => {
+    reqFunc(url, "post", req, (err, res) => {
       res.should.have.status(200);
       res.body.should.have.property("message").eql("Successfully signedup");
       done();
@@ -104,7 +99,7 @@ describe("🔥POST /google-sign/up", () => {
       hashData: "#access_token=temp-access-token",
       nickname: "yubin-j-google-1234",
     };
-    reqFunc(req, (err, res) => {
+    reqFunc(url, "post", req, (err, res) => {
       res.should.have.status(409);
       res.body.should.have.property("message").eql("Already exists email");
       done();
@@ -116,7 +111,7 @@ describe("🔥POST /google-sign/up", () => {
       hashData: "#access_token=same-nickname",
       nickname: "yubin-j-google",
     };
-    reqFunc(req, (err, res) => {
+    reqFunc(url, "post", req, (err, res) => {
       res.should.have.status(409);
       res.body.should.have.property("message").eql("Already exists nickname");
       done();
