@@ -27,12 +27,6 @@ describe("🔥GET /curations", () => {
       fields: ["address", "coordinates"],
       raw: true,
     });
-
-    // const check = await Curation.findAll({ raw: true });
-
-    // check.map((v) => {
-    //   console.log(v.coordinates.coordinates);
-    // });
   });
 
   it("check get filtered curations-1", (done) => {
@@ -43,6 +37,9 @@ describe("🔥GET /curations", () => {
     const queryStr =
       "/?coordinates=" + encodeURIComponent(JSON.stringify(coordinates));
     reqFunc(url + queryStr, "get", {}, (err, res) => {
+      res.should.have.status(200);
+      expect(res.body).to.be.an("array");
+
       const returnData = res.body.map((v) => {
         return v.address;
       });
@@ -60,11 +57,43 @@ describe("🔥GET /curations", () => {
     const queryStr =
       "/?coordinates=" + encodeURIComponent(JSON.stringify(coordinates));
     reqFunc(url + queryStr, "get", {}, (err, res) => {
+      res.should.have.status(200);
+      expect(res.body).to.be.an("array");
+
       const returnData = res.body.map((v) => {
         return v.address;
       });
 
       expect(returnData).deep.equal(["dummy3"]);
+      done();
+    });
+  });
+
+  it("check ignore wrong coordinates info", (done) => {
+    const queryStr = "/?coordinates=" + "!!!test";
+    reqFunc(url + queryStr, "get", {}, (err, res) => {
+      res.should.have.status(400);
+      res.body.should.have.property("message").eql("Insufficient info");
+      done();
+    });
+  });
+
+  it("check ignore unformatted coordinates - 1", (done) => {
+    const queryStr =
+      "/?coordinates=" + encodeURIComponent(JSON.stringify([[1, 0]], []));
+    reqFunc(url + queryStr, "get", {}, (err, res) => {
+      res.should.have.status(400);
+      res.body.should.have.property("message").eql("Insufficient info");
+      done();
+    });
+  });
+  it("check ignore unformatted coordinates - 2", (done) => {
+    const queryStr =
+      "/?coordinates=" +
+      encodeURIComponent(JSON.stringify([["!@#", 0]], [2, 2]));
+    reqFunc(url + queryStr, "get", {}, (err, res) => {
+      res.should.have.status(400);
+      res.body.should.have.property("message").eql("Insufficient info");
       done();
     });
   });

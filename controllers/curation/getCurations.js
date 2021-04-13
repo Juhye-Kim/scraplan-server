@@ -8,16 +8,29 @@ module.exports = async (req, res) => {
       return res.status(400).json({ message: "Insufficient info" });
     }
 
-    coorinates = JSON.parse(decodeURIComponent(coordinates));
+    try {
+      coordinates = JSON.parse(decodeURIComponent(coordinates));
+      if (
+        !Array.isArray(coordinates[0]) ||
+        !Array.isArray(coordinates[1]) ||
+        typeof coordinates[0][0] !== "number" ||
+        typeof coordinates[0][1] !== "number" ||
+        typeof coordinates[1][0] !== "number" ||
+        typeof coordinates[1][1] !== "number"
+      )
+        throw new Error();
+    } catch (err) {
+      return res.status(400).json({ message: "Insufficient info" });
+    }
 
     const [results, metadata] = await sequelize.query(
       `SELECT * FROM Curations WHERE MBRCONTAINS(ST_LINESTRINGFROMTEXT('LineString(? ?,? ?)'), coordinates); `,
       {
         replacements: [
-          coorinates[0][0],
-          coorinates[0][1],
-          coorinates[1][0],
-          coorinates[1][1],
+          coordinates[0][0],
+          coordinates[0][1],
+          coordinates[1][0],
+          coordinates[1][1],
         ],
       }
     );
