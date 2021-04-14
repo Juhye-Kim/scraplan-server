@@ -7,6 +7,7 @@ const reqFunc = require("../util/reqFunc");
 const url = "/curation";
 
 describe("🔥POST /curation", () => {
+  let insertedData;
   before(async () => {
     //기존 좌표값들 세팅
     let dummy = [
@@ -25,7 +26,7 @@ describe("🔥POST /curation", () => {
 
     await Curation.destroy({ where: {} });
 
-    await Curation.bulkCreate(dummy, {
+    insertedData = await Curation.bulkCreate(dummy, {
       fields: ["address", "coordinates"],
       raw: true,
     });
@@ -69,86 +70,55 @@ describe("🔥POST /curation", () => {
     });
   });
 
-  it("check address required", (done) => {
+  it("check id required", (done) => {
     const req = {
       accessToken: adminUser.accessToken,
       email: adminUser.email,
-      coordinates: encodeURIComponent(JSON.stringify([0, 1])),
     };
-    reqFunc(url, "post", req, (err, res) => {
+    reqFunc(url, "delete", req, (err, res) => {
       res.should.have.status(400);
       res.body.should.have.property("message").eql("Insufficient info");
       done();
     });
   });
 
-  it("check coordinates required", (done) => {
+  it("check ignore wrong data type", (done) => {
     const req = {
       accessToken: adminUser.accessToken,
       email: adminUser.email,
-      address: "test",
+      id: "!@#",
     };
-    reqFunc(url, "post", req, (err, res) => {
+    reqFunc(url, "delete", req, (err, res) => {
       res.should.have.status(400);
       res.body.should.have.property("message").eql("Insufficient info");
       done();
     });
   });
 
-  it("check ignore unformatted coordinates", (done) => {
+  it("check deleted data", (done) => {
     const req = {
       accessToken: adminUser.accessToken,
       email: adminUser.email,
-      coordinates: encodeURIComponent(JSON.stringify(["test", 1])),
-      address: "test",
+      id: insertedData[0].id,
     };
-    reqFunc(url, "post", req, (err, res) => {
-      res.should.have.status(400);
-      res.body.should.have.property("message").eql("Insufficient info");
-      done();
-    });
-  });
-
-  it("check ignore normal user", (done) => {
-    const req = {
-      accessToken: normalUser.accessToken,
-      email: normalUser.email,
-      coordinates: encodeURIComponent(JSON.stringify([0, 1])),
-      address: "test",
-    };
-    reqFunc(url, "post", req, (err, res) => {
-      res.should.have.status(403);
-      done();
-    });
-  });
-
-  it("check create curation", (done) => {
-    const req = {
-      accessToken: adminUser.accessToken,
-      email: adminUser.email,
-      coordinates: encodeURIComponent(JSON.stringify([0, 1])),
-      address: "test",
-    };
-    reqFunc(url, "post", req, (err, res) => {
+    reqFunc(url, "delete", req, (err, res) => {
       res.should.have.status(200);
-      res.body.should.have.property("message").eql("successfully added");
-      res.body.should.have.property("id");
+      res.body.should.have.property("message").eql("successfully deleted");
       done();
     });
   });
 
-  it("check ignore duplicate geometry", (done) => {
+  it("check ignore none exists data", (done) => {
     const req = {
       accessToken: adminUser.accessToken,
       email: adminUser.email,
-      coordinates: encodeURIComponent(JSON.stringify([0, 1])),
-      address: "test",
+      id: insertedData[0].id,
     };
-    reqFunc(url, "post", req, (err, res) => {
-      res.should.have.status(409);
+    reqFunc(url, "delete", req, (err, res) => {
+      res.should.have.status(404);
       res.body.should.have
         .property("message")
-        .eql("Already exists coordinates");
+        .eql("There is no data with given id");
       done();
     });
   });
