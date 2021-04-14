@@ -1,32 +1,35 @@
-'use strict';
+"use strict";
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('Curations', {
+    await queryInterface.createTable("Curations", {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       coordinates: {
-        allowNull:false,
-        type: Sequelize.GEOMETRY
+        allowNull: false,
+        type: Sequelize.GEOMETRY,
       },
       address: {
-        allowNull:false,
-        type: Sequelize.STRING
+        allowNull: false,
+        type: Sequelize.STRING,
+      },
+      themeInfo: {
+        type: Sequelize.JSON,
       },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE
-      }
+        type: Sequelize.DATE,
+      },
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('Curations');
-  }
+    await queryInterface.dropTable("Curations");
+  },
 };

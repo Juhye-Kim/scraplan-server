@@ -12,3 +12,4 @@ require("./curation/test.get");
 require("./curation/test.post");
 require("./curation/test.delete");
 require("./curation-card/test.get");
+require("./curation-card/test.post");

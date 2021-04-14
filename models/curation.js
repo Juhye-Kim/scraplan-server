@@ -18,6 +18,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       coordinates: DataTypes.GEOMETRY,
       address: DataTypes.STRING,
+      themeInfo: DataTypes.JSON,
     },
     {
       sequelize,
