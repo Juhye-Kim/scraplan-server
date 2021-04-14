@@ -4,7 +4,7 @@ const chai = require("chai");
 chai.should();
 const { expect } = require("chai");
 const reqFunc = require("../util/reqFunc");
-const url = "/curations";
+const url = "/curation";
 
 describe("🔥POST /curation", () => {
   before(async () => {
@@ -75,7 +75,7 @@ describe("🔥POST /curation", () => {
       email: adminUser.email,
       coordinates: encodeURIComponent(JSON.stringify([0, 1])),
     };
-    reqFunc("/curation", "post", req, (err, res) => {
+    reqFunc(url, "post", req, (err, res) => {
       res.should.have.status(400);
       res.body.should.have.property("message").eql("Insufficient info");
       done();
@@ -88,7 +88,7 @@ describe("🔥POST /curation", () => {
       email: adminUser.email,
       address: "test",
     };
-    reqFunc("/curation", "post", req, (err, res) => {
+    reqFunc(url, "post", req, (err, res) => {
       res.should.have.status(400);
       res.body.should.have.property("message").eql("Insufficient info");
       done();
@@ -102,7 +102,7 @@ describe("🔥POST /curation", () => {
       coordinates: encodeURIComponent(JSON.stringify(["test", 1])),
       address: "test",
     };
-    reqFunc("/curation", "post", req, (err, res) => {
+    reqFunc(url, "post", req, (err, res) => {
       res.should.have.status(400);
       res.body.should.have.property("message").eql("Insufficient info");
       done();
@@ -116,7 +116,7 @@ describe("🔥POST /curation", () => {
       coordinates: encodeURIComponent(JSON.stringify([0, 1])),
       address: "test",
     };
-    reqFunc("/curation", "post", req, (err, res) => {
+    reqFunc(url, "post", req, (err, res) => {
       res.should.have.status(403);
       done();
     });
@@ -129,7 +129,7 @@ describe("🔥POST /curation", () => {
       coordinates: encodeURIComponent(JSON.stringify([0, 1])),
       address: "test",
     };
-    reqFunc("/curation", "post", req, (err, res) => {
+    reqFunc(url, "post", req, (err, res) => {
       res.should.have.status(200);
       res.body.should.have.property("message").eql("successfully added");
       res.body.should.have.property("id");
@@ -144,7 +144,7 @@ describe("🔥POST /curation", () => {
       coordinates: encodeURIComponent(JSON.stringify([0, 1])),
       address: "test",
     };
-    reqFunc("/curation", "post", req, (err, res) => {
+    reqFunc(url, "post", req, (err, res) => {
       res.should.have.status(409);
       res.body.should.have
         .property("message")

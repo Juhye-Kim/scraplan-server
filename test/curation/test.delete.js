@@ -4,7 +4,7 @@ const chai = require("chai");
 chai.should();
 const { expect } = require("chai");
 const reqFunc = require("../util/reqFunc");
-const url = "/curations";
+const url = "/curation";
 
 describe("🔥POST /curation", () => {
   let insertedData;
@@ -75,7 +75,7 @@ describe("🔥POST /curation", () => {
       accessToken: adminUser.accessToken,
       email: adminUser.email,
     };
-    reqFunc("/curation", "delete", req, (err, res) => {
+    reqFunc(url, "delete", req, (err, res) => {
       res.should.have.status(400);
       res.body.should.have.property("message").eql("Insufficient info");
       done();
@@ -88,7 +88,7 @@ describe("🔥POST /curation", () => {
       email: adminUser.email,
       id: "!@#",
     };
-    reqFunc("/curation", "delete", req, (err, res) => {
+    reqFunc(url, "delete", req, (err, res) => {
       res.should.have.status(400);
       res.body.should.have.property("message").eql("Insufficient info");
       done();
@@ -101,7 +101,7 @@ describe("🔥POST /curation", () => {
       email: adminUser.email,
       id: insertedData[0].id,
     };
-    reqFunc("/curation", "delete", req, (err, res) => {
+    reqFunc(url, "delete", req, (err, res) => {
       res.should.have.status(200);
       res.body.should.have.property("message").eql("successfully deleted");
       done();
@@ -114,7 +114,7 @@ describe("🔥POST /curation", () => {
       email: adminUser.email,
       id: insertedData[0].id,
     };
-    reqFunc("/curation", "delete", req, (err, res) => {
+    reqFunc(url, "delete", req, (err, res) => {
       res.should.have.status(404);
       res.body.should.have
         .property("message")
