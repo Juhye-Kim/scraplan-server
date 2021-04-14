@@ -4,7 +4,7 @@ const controller = require("../controllers/curation-card");
 const requiredTokenCheck = require("../middlewares/requiredTokenCheck");
 
 router.post("/", requiredTokenCheck, controller.post);
-router.delete("/", requiredTokenCheck, controller.patch);
+router.patch("/", requiredTokenCheck, controller.patch);
 router.delete("/", requiredTokenCheck, controller.delete);
 
 module.exports = router;
