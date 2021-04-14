@@ -19,7 +19,6 @@ describe("🔥POST /curation-card", () => {
     const resultCuration = await Curation.create(curationDummy);
     const curationId = resultCuration.id;
     baseReq.curationId = curationId;
-    console.log("!!!!!!!", baseReq);
     const curationCardDummy = [
       {
         CurationId: curationId,
