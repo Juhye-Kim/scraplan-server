@@ -25,6 +25,11 @@ module.exports = {
       googleData: {
         type: Sequelize.STRING,
       },
+      isAdmin: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+        allowNull: false,
+      },
       latestToken: {
         type: Sequelize.STRING,
       },

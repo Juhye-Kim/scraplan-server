@@ -9,3 +9,4 @@ require("./google-sign/test.withdraw");
 require("./user/test.info");
 require("./user/test.editInfo");
 require("./curation/test.get");
+require("./curation/test.post");
