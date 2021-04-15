@@ -15,3 +15,4 @@ require("./curation-card/test.get");
 require("./curation-card/test.post");
 require("./curation-card/test.patch");
 require("./curation-card/test.delete");
+require("./curation-card-feedback/test.get");
