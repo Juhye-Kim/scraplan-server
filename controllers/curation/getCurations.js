@@ -2,9 +2,9 @@ const { sequelize } = require("../../models");
 
 module.exports = async (req, res) => {
   try {
-    let { coordinates } = req.query;
+    let { coordinates, theme } = req.query;
 
-    if (!coordinates) {
+    if (!coordinates || (theme && isNaN(Number(theme)))) {
       return res.status(400).json({ message: "Insufficient info" });
     }
 
@@ -23,17 +23,17 @@ module.exports = async (req, res) => {
       return res.status(400).json({ message: "Insufficient info" });
     }
 
-    const [results, metadata] = await sequelize.query(
-      `SELECT * FROM Curations WHERE MBRCONTAINS(ST_LINESTRINGFROMTEXT('LineString(? ?,? ?)'), coordinates); `,
-      {
-        replacements: [
-          coordinates[0][0],
-          coordinates[0][1],
-          coordinates[1][0],
-          coordinates[1][1],
-        ],
-      }
-    );
+    const query = `SELECT id, coordinates, address FROM Curations WHERE MBRCONTAINS(ST_LINESTRINGFROMTEXT('LineString(? ?,? ?)'), coordinates)
+    ${theme > -1 ? `AND ${theme} MEMBER OF (themeInfo)` : ""};`;
+
+    const [results, metadata] = await sequelize.query(query, {
+      replacements: [
+        coordinates[0][0],
+        coordinates[0][1],
+        coordinates[1][0],
+        coordinates[1][1],
+      ],
+    });
 
     res.status(200).json(results);
   } catch (err) {
