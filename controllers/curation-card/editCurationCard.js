@@ -14,7 +14,7 @@ module.exports = async (req, res) => {
   const { curationCardId, theme, title, detail, photo } = req.body;
   if (
     (curationCardId > -1 ? isNaN(Number(curationCardId)) : true) ||
-    (theme > -1 ? isNaN(Number(theme)) : false) ||
+    (theme > -1 ? isNaN(Number(theme)) : true) ||
     !(theme || title || detail || photo)
   ) {
     return res.status(400).json({ message: "Insufficient info" });
