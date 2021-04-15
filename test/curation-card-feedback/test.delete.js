@@ -6,7 +6,7 @@ const reqFunc = require("../util/reqFunc");
 const dbCreate = require("./db");
 const calcAvgTime = require("../../controllers/curation-card-feedback/calcAvgTime");
 
-describe("🔥PATCH /curation-card-feedback", () => {
+describe("🔥DELETE /curation-card-feedback", () => {
   const baseReq = {};
   const insufficientCall = (err, res, code, message, done) => {
     res.should.have.status(code);
@@ -23,26 +23,45 @@ describe("🔥PATCH /curation-card-feedback", () => {
     requiredFields.forEach((field) => {
       req[field] = baseReq[field];
     });
-    reqFunc(url, "patch", req, (err, res) => {
+    reqFunc(url, "delete", req, (err, res) => {
       insufficientCall(err, res, 400, message, done);
     });
   };
-  const optionalCheck = (
-    done,
-    terminateFields,
-    message = "successfully edited"
-  ) => {
-    const req = { ...baseReq };
 
-    terminateFields.forEach((field) => {
-      delete req[field];
-    });
-    reqFunc(url, "patch", req, (err, res) => {
-      insufficientCall(err, res, 200, message, done);
-    });
+  //curation-card-feedback DELETE메서드 확인용 함수. 다른 곳에서 그대로 사용 금지...
+  const checkDeleteFeedback = (done) => {
+    CurationFeedback.findAll({
+      include: [{ model: CurationCard }],
+      where: { CurationCardId: curationCard.id },
+      raw: true,
+    })
+      .then((feedbacks) => {
+        const sourceLen = curationFeedbacks.length;
+        if (sourceLen > 0) {
+          expect(feedbacks.length).to.eql(sourceLen);
+          let sumOfTime = 0;
+          for (const curationFeedback of curationFeedbacks) {
+            sumOfTime += curationFeedback.times;
+          }
+
+          expect(calcAvgTime(sumOfTime, sourceLen)).to.eql(
+            feedbacks[0]["CurationCard.avgTime"]
+          );
+          done();
+        } else {
+          CurationCard.findOne({ where: curationCard.id })
+            .then((curationCard) => {
+              expect(curationCard.avgTime).to.eql(0);
+              expect(curationCard.feedbackCnt).to.eql(0);
+              done();
+            })
+            .catch((err) => done(err));
+        }
+      })
+      .catch((err) => done(err));
   };
 
-  let curationCard1, curationCard2;
+  let curationCard;
   let curationFeedbacks = [];
   let normalUserResult, otherUserResult;
   const url = "/curation-card-feedback";
@@ -83,26 +102,26 @@ describe("🔥PATCH /curation-card-feedback", () => {
       },
     ];
 
-    curationCard1 = await dbCreate.makeCurationCard(curationCardDummy[0]);
+    curationCard = await dbCreate.makeCurationCard(curationCardDummy[0]);
 
     const curationFeedbackDummy = [
       {
         UserId: normalUserResult.id,
-        CurationCardId: curationCard1.id,
+        CurationCardId: curationCard.id,
         times: 1,
         comment: "AAAAAA",
         rate: 1,
       },
       {
         UserId: normalUserResult.id,
-        CurationCardId: curationCard1.id,
+        CurationCardId: curationCard.id,
         times: 1.3,
         comment: "BBBBBB",
         rate: 1,
       },
       {
         UserId: normalUserResult.id,
-        CurationCardId: curationCard1.id,
+        CurationCardId: curationCard.id,
         times: 2.15,
         comment: "CCCCCC",
         rate: 1,
@@ -122,18 +141,12 @@ describe("🔥PATCH /curation-card-feedback", () => {
     curationFeedbacks = curationFeedbacks.map((feedback) => {
       return {
         curationFeedbackId: feedback.id,
-        writer: normalUserResult.nickname,
         times: feedback.times,
-        comment: feedback.comment,
-        rate: feedback.rate,
       };
     });
 
     baseReq.email = normalUserResult.email;
     baseReq.curationFeedbackId = curationFeedbacks[0].curationFeedbackId;
-    baseReq.times = 5;
-    baseReq.comment = "DDDDDD";
-    baseReq.rate = 3;
   });
 
   it("get accesstoken", (done) => {
@@ -160,56 +173,20 @@ describe("🔥PATCH /curation-card-feedback", () => {
   });
 
   it("check accessToken required", (done) => {
-    requiredCheck(done, [
-      "email",
-      "curationFeedbackId",
-      "times",
-      "comment",
-      "rate",
-    ]);
+    requiredCheck(done, ["email", "curationFeedbackId"]);
   });
   it("check email required", (done) => {
-    requiredCheck(done, [
-      "accessToken",
-      "curationFeedbackId",
-      "times",
-      "comment",
-      "rate",
-    ]);
+    requiredCheck(done, ["accessToken", "curationFeedbackId"]);
   });
   it("check curationFeedbackId required", (done) => {
-    requiredCheck(done, ["email", "accessToken", "times", "comment", "rate"]);
-  });
-  it("check at least one optional data required", (done) => {
-    requiredCheck(done, ["accessToken", "email", "curationFeedbackId"]);
+    requiredCheck(done, ["accessToken", "email"]);
   });
 
-  it("check can change by one optional data - times", (done) => {
-    optionalCheck(done, ["comment", "rate"]);
-  });
-  it("check can change by one optional data - comment", (done) => {
-    optionalCheck(done, ["times", "rate"]);
-  });
-  it("check can change by one optional data - rate", (done) => {
-    optionalCheck(done, ["times", "comment"]);
-  });
-
-  it("check ignore wrong data type - times", (done) => {
+  it("check ignore wrong data type - curationFeedbackId", (done) => {
     const req = { ...baseReq };
-    req.times = "test";
+    req.curationFeedbackId = "test";
 
-    reqFunc(url, "patch", req, (err, res) => {
-      res.should.have.status(400);
-      res.body.should.have.property("message").eql("Insufficient info");
-
-      done();
-    });
-  });
-  it("check ignore wrong data type - rate", (done) => {
-    const req = { ...baseReq };
-    req.rate = "test";
-
-    reqFunc(url, "patch", req, (err, res) => {
+    reqFunc(url, "delete", req, (err, res) => {
       res.should.have.status(400);
       res.body.should.have.property("message").eql("Insufficient info");
 
@@ -217,62 +194,37 @@ describe("🔥PATCH /curation-card-feedback", () => {
     });
   });
 
-  it("check at least one changed option required", (done) => {
+  it("check deleted feedback-1 and updated curation card ", (done) => {
     const req = { ...baseReq };
+    //curationCard.id => curatinoCard의 id값
+    req.curationFeedbackId = curationFeedbacks.shift().curationFeedbackId;
 
-    reqFunc(url, "patch", req, (err, res) => {
-      res.should.have.status(400);
-      res.body.should.have.property("message").eql("Nothing Changed");
-
-      done();
-    });
-  });
-
-  it("check changed curation feedback and curation cards avgTime", (done) => {
-    const req = { ...baseReq };
-    req.times = 10;
-    req.comment = "wow!!";
-    req.rate = 10;
-
-    reqFunc(url, "patch", req, (err, res) => {
+    reqFunc(url, "delete", req, (err, res) => {
       res.should.have.status(200);
-      res.body.should.have.property("message").eql("successfully edited");
-
-      CurationFeedback.findOne({
-        include: [{ model: CurationCard, required: true }],
-        where: { id: req.curationFeedbackId },
-        raw: true,
-      })
-        .then((curationFeedback) => {
-          let sumOfTime = req.times;
-          for (const curationFeedback of curationFeedbacks) {
-            if (
-              curationFeedback.curationFeedbackId !== req.curationFeedbackId
-            ) {
-              sumOfTime += curationFeedback.times;
-            }
-          }
-
-          expect(calcAvgTime(sumOfTime, curationFeedbacks.length)).to.eql(
-            curationFeedback["CurationCard.avgTime"]
-          );
-          expect(curationFeedback.times).to.eql(req.times);
-          expect(curationFeedback.comment).to.eql(req.comment);
-          expect(curationFeedback.rate).to.eql(req.rate);
-          done();
-        })
-        .catch((err) => done(err));
+      res.body.should.have.property("message").eql("successfully deleted");
+      checkDeleteFeedback(done);
     });
   });
-
-  it("ignore other user access", (done) => {
+  it("check deleted feedback-2 and updated curation card ", (done) => {
     const req = { ...baseReq };
-    req.accessToken = otherUserResult.accessToken;
-    req.email = otherUserResult.email;
+    //curationCard.id => curatinoCard의 id값
+    req.curationFeedbackId = curationFeedbacks.shift().curationFeedbackId;
 
-    reqFunc(url, "patch", req, (err, res) => {
-      res.should.have.status(403);
-      done();
+    reqFunc(url, "delete", req, (err, res) => {
+      res.should.have.status(200);
+      res.body.should.have.property("message").eql("successfully deleted");
+      checkDeleteFeedback(done);
+    });
+  });
+  it("check deleted feedback-3 and updated curation card ", (done) => {
+    const req = { ...baseReq };
+    //curationCard.id => curatinoCard의 id값
+    req.curationFeedbackId = curationFeedbacks.shift().curationFeedbackId;
+
+    reqFunc(url, "delete", req, (err, res) => {
+      res.should.have.status(200);
+      res.body.should.have.property("message").eql("successfully deleted");
+      checkDeleteFeedback(done);
     });
   });
 });
