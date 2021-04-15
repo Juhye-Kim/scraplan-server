@@ -152,7 +152,17 @@ describe("🔥POST /curation-card", () => {
     reqFunc(url, "delete", req, (err, res) => {
       res.should.have.status(200);
       res.body.should.have.property("message").eql("successfully deleted");
-      done();
+
+      Curation.findOne({
+        where: { id: targetCurationId },
+      })
+        .then((curationInfo) => {
+          expect(curationInfo.themeInfo).to.deep.equal([1]);
+          done();
+        })
+        .catch((err) => {
+          done(err);
+        });
     });
   });
   it("check ignore none exists resource", (done) => {
@@ -166,17 +176,5 @@ describe("🔥POST /curation-card", () => {
       res.should.have.status(404);
       done();
     });
-  });
-  it("check db changed", (done) => {
-    Curation.findOne({
-      where: { id: targetCurationId },
-    })
-      .then((curationInfo) => {
-        expect(curationInfo.themeInfo).to.deep.equal([1]);
-        done();
-      })
-      .catch((err) => {
-        done(err);
-      });
   });
 });
