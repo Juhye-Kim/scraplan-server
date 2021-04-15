@@ -24,6 +24,8 @@ module.exports = (sequelize, DataTypes) => {
       title: DataTypes.STRING,
       detail: DataTypes.STRING,
       photo: DataTypes.STRING,
+      avgTime: DataTypes.FLOAT,
+      feedbackCnt: DataTypes.INTEGER,
     },
     {
       sequelize,
