@@ -144,6 +144,16 @@ describe("🔥PATCH /curation-card", () => {
       "Nothing Changed"
     );
   });
+  it("check ignore normal user", (done) => {
+    const req = { ...baseReq };
+    req.accessToken = normalUser.accessToken;
+    req.email = normalUser.email;
+
+    reqFunc(url, "patch", req, (err, res) => {
+      res.should.have.status(403);
+      done();
+    });
+  });
   it("check value changed", (done) => {
     baseReq.title = "change test title";
     baseReq.detail = "change test detail";
@@ -153,7 +163,20 @@ describe("🔥PATCH /curation-card", () => {
     reqFunc(url, "patch", req, (err, res) => {
       res.should.have.status(200);
       res.body.should.have.property("message").eql("successfully edited");
-      done();
+      CurationCard.findOne({
+        where: { id: baseReq.curationCardId },
+        raw: true,
+      })
+        .then((curationCardInfo) => {
+          curationCardInfo.theme.should.eql(baseReq.theme);
+          curationCardInfo.title.should.eql(baseReq.title);
+          curationCardInfo.detail.should.eql(baseReq.detail);
+          curationCardInfo.photo.should.eql(baseReq.photo);
+          done();
+        })
+        .catch((err) => {
+          done(err);
+        });
     });
   });
   it("check change none exists theme", (done) => {
@@ -166,17 +189,17 @@ describe("🔥PATCH /curation-card", () => {
     reqFunc(url, "patch", req, (err, res) => {
       res.should.have.status(200);
       res.body.should.have.property("message").eql("successfully edited");
-      done();
-    });
-  });
-  it("check ignore normal user", (done) => {
-    const req = { ...baseReq };
-    req.accessToken = normalUser.accessToken;
-    req.email = normalUser.email;
-
-    reqFunc(url, "patch", req, (err, res) => {
-      res.should.have.status(403);
-      done();
+      CurationCard.findOne({
+        where: { id: baseReq.curationCardId },
+        raw: true,
+      })
+        .then((curationCardInfo) => {
+          curationCardInfo.theme.should.eql(valueWillChangedTheme);
+          done();
+        })
+        .catch((err) => {
+          done(err);
+        });
     });
   });
   it("check ignore change to exists theme", (done) => {
@@ -191,21 +214,5 @@ describe("🔥PATCH /curation-card", () => {
       res.body.should.have.property("message").eql("Already exists theme");
       done();
     });
-  });
-  it("check db changed", (done) => {
-    CurationCard.findOne({
-      where: { id: baseReq.curationCardId },
-      raw: true,
-    })
-      .then((curationCardInfo) => {
-        curationCardInfo.theme.should.eql(valueWillChangedTheme);
-        curationCardInfo.title.should.eql(baseReq.title);
-        curationCardInfo.detail.should.eql(baseReq.detail);
-        curationCardInfo.photo.should.eql(baseReq.photo);
-        done();
-      })
-      .catch((err) => {
-        done(err);
-      });
   });
 });

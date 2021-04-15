@@ -1,6 +1,6 @@
 module.exports = {
-  get: require("./getCurationCardFeedbacks"),
-  post: require("./createCurationCardFeedback"),
-  patch: require("./editCurationCardFeedback"),
-  delete: require("./deleteCurationCardFeedback"),
+  get: require("./getCurationFeedbacks"),
+  post: require("./createCurationFeedback"),
+  patch: require("./editCurationFeedback"),
+  delete: require("./deleteCurationFeedback"),
 };

@@ -45,19 +45,18 @@ module.exports = async (req, res) => {
 
       await curation.save({ transaction: t });
       await curationCard.destroy({ transaction: t });
-
-      res.status(200).json({ message: "successfully deleted" });
     });
   } catch (err) {
     if (err instanceof errorMessage) {
-      res.status(err.code).json({ message: err.message });
+      return res.status(err.code).json({ message: err.message });
     } else {
       console.log(
         "-------------------------------Error occurred in curation-card/deleteCurationCard.js-------------------------------- \n",
         err,
         "-------------------------------Error occurred in curation-card/deleteCurationCard.js-------------------------------- \n"
       );
-      res.status(500).send();
+      return res.status(500).send();
     }
   }
+  res.status(200).json({ message: "successfully deleted" });
 };

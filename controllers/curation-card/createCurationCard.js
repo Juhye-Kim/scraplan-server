@@ -76,19 +76,18 @@ module.exports = async (req, res) => {
           transaction: t,
         }
       );
-
-      return res.status(200).json({ message: "successfully added" });
     });
   } catch (err) {
     if (err instanceof errorMessage) {
-      res.status(err.code).json({ message: err.message });
+      return res.status(err.code).json({ message: err.message });
     } else {
       console.log(
         "-------------------------------Error occurred in curation-card/createCurationCard.js-------------------------------- \n",
         err,
         "-------------------------------Error occurred in curation-card/createCurationCard.js-------------------------------- \n"
       );
-      res.status(500).send();
+      return res.status(500).send();
     }
   }
+  res.status(200).json({ message: "successfully added" });
 };
