@@ -1,4 +1,4 @@
-const { CurationCard } = require("../../models");
+const { CurationCard, sequelize } = require("../../models");
 
 module.exports = async (req, res) => {
   const { curationId } = req.params;
@@ -8,6 +8,15 @@ module.exports = async (req, res) => {
 
   try {
     const curationCards = await CurationCard.findAll({
+      attributes: [
+        [sequelize.col("CurationCard.id"), "curationCardId"],
+        "theme",
+        "title",
+        "detail",
+        "photo",
+        "avgTime",
+        "feedbackCnt",
+      ],
       where: { CurationId: curationId },
       raw: true,
     });
