@@ -83,19 +83,18 @@ module.exports = async (req, res) => {
       } else {
         throw new errorMessage(400, "Nothing Changed");
       }
-
-      return res.status(200).json({ message: "successfully edited" });
     });
   } catch (err) {
     if (err instanceof errorMessage) {
-      res.status(err.code).json({ message: err.message });
+      return res.status(err.code).json({ message: err.message });
     } else {
       console.log(
         "-------------------------------Error occurred in curation-card/editCurationCard.js-------------------------------- \n",
         err,
         "-------------------------------Error occurred in curation-card/editCurationCard.js-------------------------------- \n"
       );
-      res.status(500).send();
+      return res.status(500).send();
     }
   }
+  res.status(200).json({ message: "successfully edited" });
 };
