@@ -17,3 +17,4 @@ require("./curation-card/test.patch");
 require("./curation-card/test.delete");
 require("./curation-card-feedback/test.get");
 require("./curation-card-feedback/test.post");
+require("./curation-card-feedback/test.patch");
