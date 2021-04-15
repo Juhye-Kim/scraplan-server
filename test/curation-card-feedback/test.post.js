@@ -6,7 +6,7 @@ const reqFunc = require("../util/reqFunc");
 const dbCreate = require("./db");
 const calcAvgTime = require("../../controllers/curation-card-feedback/calcAvgTime");
 
-describe("🔥GET /curation-card-feedbacks", () => {
+describe("🔥POST /curation-card-feedback", () => {
   const baseReq = {};
   const insufficientCall = (err, res, done) => {
     res.should.have.status(400);
