@@ -144,6 +144,28 @@ describe("🔥PATCH /curation-card", () => {
       "Nothing Changed"
     );
   });
+
+  it("check ignore wrong data type - curationCardId", (done) => {
+    const req = { ...baseReq };
+    req.curationCardId = "Test";
+
+    reqFunc(url, "patch", req, (err, res) => {
+      res.should.have.status(400);
+      res.body.should.have.property("message").eql("Insufficient info");
+      done();
+    });
+  });
+  it("check ignore wrong data type - theme", (done) => {
+    const req = { ...baseReq };
+    req.theme = "Test";
+
+    reqFunc(url, "patch", req, (err, res) => {
+      res.should.have.status(400);
+      res.body.should.have.property("message").eql("Insufficient info");
+      done();
+    });
+  });
+
   it("check ignore normal user", (done) => {
     const req = { ...baseReq };
     req.accessToken = normalUser.accessToken;
