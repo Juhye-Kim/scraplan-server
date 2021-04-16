@@ -22,25 +22,33 @@ const userRouter = require("./routers/user");
 const curationRouter = require("./routers/curation");
 const curationCardRouter = require("./routers/curation-card");
 const curationCardFeedbackRouter = require("./routers/curation-card-feedback");
+const planRouter = require("./routers/plan");
+
+app.use("/sign", signRouter);
+app.use("/google-sign", googleSignRouter);
+app.use("/user", userRouter);
+app.use("/curation", curationRouter);
+app.use("/curation-card", curationCardRouter);
+app.use("/curation-card-feedback", curationCardFeedbackRouter);
+app.use("/plan", planRouter);
 
 app.get("/", (req, res) => {
   res.send("Scraplan server connected");
 });
-app.use("/sign", signRouter);
-app.use("/google-sign", googleSignRouter);
-app.use("/user", userRouter);
 app.get("/curations", require("./controllers/curation").get);
-app.use("/curation", curationRouter);
 app.get(
   "/curation-cards/:curationId",
   require("./controllers/curation-card").get
 );
-app.use("/curation-card", curationCardRouter);
 app.get(
   "/curation-card-feedbacks/:curationCardId",
   require("./controllers/curation-card-feedback").get
 );
-app.use("/curation-card-feedback", curationCardFeedbackRouter);
+app.get(
+  "/plans/:pagenation",
+  require("./middlewares/optionalTokenCheck"),
+  require("./controllers/plan").get
+);
 
 //HTTPS 서버 여는 코드
 const ca = fs.readFileSync(process.env.SSL_CA);
