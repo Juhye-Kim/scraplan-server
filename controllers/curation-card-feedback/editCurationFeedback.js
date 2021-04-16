@@ -4,6 +4,7 @@ const {
   sequelize,
   Sequelize,
 } = require("../../models");
+const checkNumberType = require("../util/checkNumberType");
 
 const calcAvgTime = require("./calcAvgTime");
 
@@ -13,8 +14,8 @@ module.exports = async (req, res) => {
 
   if (
     !(authData && curationFeedbackId && (times || comment || rate)) ||
-    (times && isNaN(Number(times))) ||
-    (rate && isNaN(Number(rate)))
+    checkNumberType("optional", times) ||
+    checkNumberType("optional", rate)
   ) {
     return res.status(400).json({ message: "Insufficient info" });
   }

@@ -4,6 +4,7 @@ const {
   sequelize,
   Sequelize,
 } = require("../../models");
+const checkNumberType = require("../util/checkNumberType");
 
 module.exports = async (req, res) => {
   const { authData } = req;
@@ -12,7 +13,7 @@ module.exports = async (req, res) => {
   }
 
   const { curationCardId } = req.body;
-  if (curationCardId > -1 ? isNaN(Number(curationCardId)) : true) {
+  if (checkNumberType("required", curationCardId)) {
     return res.status(400).json({ message: "Insufficient info" });
   }
 
