@@ -14,29 +14,18 @@ describe("🔥POST /curation-card", () => {
     const curationDummy = {
       address: `testAddr1`,
       coordinates: { type: "Point", coordinates: [10, 12] },
-      themeInfo: [1, 2],
     };
     const resultCuration = await Curation.create(curationDummy);
-    const curationId = resultCuration.id;
-    baseReq.curationId = curationId;
-    const curationCardDummy = [
-      {
-        CurationId: curationId,
-        theme: 1,
-        title: "감성 카페",
-        detail: "테라스에서 보이는 강이 아주 분위기 있는 곳",
-        photo: "https://photo.scraplan.com/~~~",
-      },
-      {
-        CurationId: curationId,
-        theme: 2,
-        title: "시원한 풍경",
-        detail: "강 주변이 아주 아름답게 되어 있는 곳",
-        photo: "https://photo.scraplan.com/~~~",
-      },
-    ];
 
-    await CurationCard.bulkCreate(curationCardDummy);
+    //기존 테스트 케이스 세팅에서 사용하지 않는 curation-card에 관한 부분을 다 지우고
+    //curation의 themeInfo가 undefined값인지 확인하기 위해 아래 조건과 같이 작성하였다.
+    if (!resultCuration.themeInfo) {
+      //undefined값인 상태이면 baseReq에서 꼭 필요한 데이터인 curationId를 설정할 것이고.
+      //undefined값이 아닌 상태이면 curationId는 없는 값이 되어 테스트케이스가 통과하지 못할 것이다.
+      baseReq.curationId = resultCuration.id;
+    }
+    //themeInfo가 빈 배열이 아닌 undefined상태임에도 모든 테스트케이스가 잘 동작한다는 것은 API에서
+    //처리를 해주고 있다고 보고 테스트 케이스 통과로 볼 수 있다.
 
     await User.create({
       email: "test@test.com",
@@ -79,8 +68,7 @@ describe("🔥POST /curation-card", () => {
   const baseReq = {
     accessToken: "",
     email: adminUser.email,
-    curationId: 0,
-    theme: 3,
+    theme: 1,
     title: "제목 테스트",
     detail: "디테일 테스트",
     photo: "http://~~~~~",

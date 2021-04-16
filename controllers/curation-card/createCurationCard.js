@@ -44,16 +44,20 @@ module.exports = async (req, res) => {
         throw new errorMessage(404, "There is no data with given curation id");
       }
 
-      //curation에 이미 등록된 theme 정보인지 확인, 이미 등록되어 있다면 409반환
-      let isExists = false;
-      for (const el of curation.themeInfo) {
-        if (el === theme) {
-          isExists = true;
-          break;
+      //curation의 themeInfo가 배열이 아니었다면 빈배열로 초기화. 배열이었다면 theme이 기등록된 정보인지 확인.
+      if (!Array.isArray(curation.themeInfo)) curation.themeInfo = [];
+      else {
+        //curation에 이미 등록된 theme 정보인지 확인, 이미 등록되어 있다면 409반환
+        let isExists = false;
+        for (const el of curation.themeInfo) {
+          if (el === theme) {
+            isExists = true;
+            break;
+          }
         }
-      }
-      if (isExists) {
-        throw new errorMessage(409, "Already exists theme");
+        if (isExists) {
+          throw new errorMessage(409, "Already exists theme");
+        }
       }
 
       //자식이 변경되는 경우에는 save옵션을 사용해도 무시하기 떄문에 새로 할당
