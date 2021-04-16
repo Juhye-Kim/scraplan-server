@@ -11,6 +11,8 @@ module.exports = async (req, res, next) => {
     email = req.body.email;
   } else if (req.params.email) {
     email = req.params.email;
+  } else if (req.query.email) {
+    email = req.query.email;
   }
 
   if (authorization && email) {

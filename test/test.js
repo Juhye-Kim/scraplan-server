@@ -19,3 +19,4 @@ require("./curation-card-feedback/test.get");
 require("./curation-card-feedback/test.post");
 require("./curation-card-feedback/test.patch");
 require("./curation-card-feedback/test.delete");
+require("./plan/test.get");
