@@ -1,4 +1,5 @@
 const { Curation, CurationCard, sequelize } = require("../../models");
+const checkNumberType = require("../util/checkNumberType");
 
 module.exports = async (req, res) => {
   const { authData } = req;
@@ -8,10 +9,8 @@ module.exports = async (req, res) => {
 
   const { curationId, theme, title, detail, photo } = req.body;
   if (
-    !curationId ||
-    isNaN(Number(curationId)) ||
-    !(theme > -1) ||
-    isNaN(Number(theme)) ||
+    checkNumberType("required", curationId) ||
+    checkNumberType("required", theme) ||
     !title ||
     !detail ||
     !photo

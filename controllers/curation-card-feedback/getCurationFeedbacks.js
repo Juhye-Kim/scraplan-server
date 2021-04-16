@@ -5,6 +5,7 @@ const {
   sequelize,
   Sequelize,
 } = require("../../models");
+const checkNumberType = require("../util/checkNumberType");
 
 module.exports = async (req, res) => {
   const { curationCardId } = req.params;
@@ -13,8 +14,8 @@ module.exports = async (req, res) => {
 
   if (
     !curationCardId ||
-    (minTime && isNaN(Number(minTime))) ||
-    (maxTime && isNaN(Number(maxTime)))
+    checkNumberType("optional", minTime) ||
+    checkNumberType("optional", maxTime)
   ) {
     return res.status(400).json({ message: "Insufficient info" });
   }

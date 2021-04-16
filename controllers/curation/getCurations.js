@@ -1,10 +1,11 @@
 const { sequelize } = require("../../models");
+const checkNumberType = require("../util/checkNumberType");
 
 module.exports = async (req, res) => {
   try {
     let { coordinates, theme } = req.query;
 
-    if (!coordinates || (theme && isNaN(Number(theme)))) {
+    if (!coordinates || checkNumberType("optional", theme)) {
       return res.status(400).json({ message: "Insufficient info" });
     }
 
