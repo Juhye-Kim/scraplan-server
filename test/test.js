@@ -22,3 +22,4 @@ require("./curation-card-feedback/test.delete");
 require("./plan/test.get");
 require("./plan/test.post");
 require("./plan/test.patch");
+require("./plan/test.delete");
