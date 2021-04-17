@@ -133,6 +133,20 @@ describe("🔥POST /plan", () => {
     checkRequiredField("planCards", done);
   });
 
+  it("check igrnore wrong data type public", (done) => {
+    const req = {
+      accessToken: users[0].result.latestToken,
+      ...plans,
+    };
+    req.public = "true";
+
+    reqFunc(url, "post", req, (err, res) => {
+      res.should.have.status(400);
+      res.body.should.have.property("message").eql("Insufficient info");
+      done();
+    });
+  });
+
   it("check ignore wrong data type planCards-day", (done) => {
     checkPlanCard({ day: "TEST" }, done);
   });
@@ -160,6 +174,8 @@ describe("🔥POST /plan", () => {
       accessToken: users[0].result.latestToken,
       ...plans,
     };
+    //public boolean타입 검사를 위해 false로 설정
+    req.public = false;
     reqFunc(url, "post", req, (err, res) => {
       res.should.have.status(200);
       res.body.should.have.property("message").eql("successfully added");
