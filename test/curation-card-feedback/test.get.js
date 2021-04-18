@@ -106,12 +106,31 @@ describe("🔥GET /curation-card-feedbacks", () => {
     });
   });
 
+  it("check ignore wrong data type of pagenation", (done) => {
+    const path = `/${curationCard1.id}`;
+    const query = `/?pagenation=test`;
+    reqFunc(url + path + query, "get", {}, (err, res) => {
+      res.should.have.status(400);
+      res.body.should.have.property("message").eql("Insufficient info");
+      done();
+    });
+  });
   it("check ignore wrong max-Time filter", (done) => {
     const path = `/${curationCard1.id}`;
     const wrongQuery = `/?max-Time=test`;
     reqFunc(url + path + wrongQuery, "get", {}, (err, res) => {
       res.should.have.status(400);
       res.body.should.have.property("message").eql("Insufficient info");
+      done();
+    });
+  });
+  it("check get empty value with none exists page info", (done) => {
+    const path = `/${curationCard1.id}`;
+    const query = `/?pagenation=2`;
+    reqFunc(url + path + query, "get", {}, (err, res) => {
+      res.should.have.status(200);
+      expect(res.body).to.be.an("array");
+      expect(res.body).to.deep.eql([]);
       done();
     });
   });

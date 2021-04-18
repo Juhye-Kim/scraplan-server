@@ -9,11 +9,13 @@ const checkNumberType = require("../util/checkNumberType");
 
 module.exports = async (req, res) => {
   const { curationCardId } = req.params;
+  const pagenation = req.query.pagenation || 1;
   const minTime = req.query["min-Time"];
   const maxTime = req.query["max-Time"];
 
   if (
     !curationCardId ||
+    checkNumberType("required", pagenation) ||
     checkNumberType("optional", minTime) ||
     checkNumberType("optional", maxTime)
   ) {
@@ -66,8 +68,8 @@ module.exports = async (req, res) => {
       ],
       include: [{ model: User, attributes: [], required: true }],
       where: findOptions,
-      offset: 0,
-      limit: 10, //pagenation적용해야 함.
+      offset: (pagenation - 1) * 10,
+      limit: 10,
       order: [["createdAt", "DESC"]],
       raw: true,
     });
