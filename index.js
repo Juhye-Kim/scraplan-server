@@ -49,6 +49,11 @@ app.get(
   require("./middlewares/optionalTokenCheck"),
   require("./controllers/plan").get
 );
+app.get(
+  "/plan-cards/:planId",
+  require("./middlewares/optionalTokenCheck"),
+  require("./controllers/plan-card").get
+);
 
 //HTTPS 서버 여는 코드
 const ca = fs.readFileSync(process.env.SSL_CA);
