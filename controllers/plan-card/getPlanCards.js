@@ -11,9 +11,9 @@ module.exports = async (req, res) => {
 
   const isMember = authData && "id" in authData ? true : false;
   let planCards,
-    isValid = false,
-    mbrs,
-    metadata;
+    isValid = false;
+  // markers,
+  // metadata;
 
   function errorMessage(code, message) {
     this.code = code;
@@ -40,11 +40,13 @@ module.exports = async (req, res) => {
         throw new errorMessage(404, "There is no data with given plan id");
       }
 
+      //day별 마커 위치를 모아서 알려준다. 마커들의 좌표값은 longitude, latitude : x, y 순서로 이루어져 있다.
+      // const query = `SELECT  day, GROUP_CONCAT("[",ST_X(coordinates), ",",ST_Y(coordinates),"]") as markers FROM PlanCards WHERE PlanId = ${planId} GROUP BY day`;
       //day별로 각 위치들의 mbr을 보내준다.
-      const query = `SELECT day, 
-      ST_Envelope(ST_GeomFromText(concat('GEOMETRYCOLLECTION(',GROUP_CONCAT('Point(', ST_X(coordinates), ' ', ST_Y(coordinates),')'),')'))) as mbr
-      FROM PlanCards WHERE PlanId = ${planId} GROUP BY day`;
-      [mbrs, metadata] = await sequelize.query(query, {});
+      // const query = `SELECT day,
+      // ST_Envelope(ST_GeomFromText(concat('GEOMETRYCOLLECTION(',GROUP_CONCAT('Point(', ST_X(coordinates), ' ', ST_Y(coordinates),')'),')'))) as mbr
+      // FROM PlanCards WHERE PlanId = ${planId} GROUP BY day`;
+      // [markers, metadata] = await sequelize.query(query, {});
 
       if (isMember) {
         const checkValid = await Plan.count({
@@ -68,5 +70,5 @@ module.exports = async (req, res) => {
     }
   }
 
-  res.status(200).json({ isMember, isValid, planCards, mbrs });
+  res.status(200).json({ isMember, isValid, planCards });
 };
