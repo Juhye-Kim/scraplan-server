@@ -4,7 +4,13 @@ module.exports = async (req, res) => {
   const { title, desc, public, representAddr } = req.body;
   let { planCards } = req.body;
 
-  if (!authData || !title || !public || !representAddr || !planCards) {
+  if (
+    !authData ||
+    !title ||
+    !(public === true || public === false) ||
+    !representAddr ||
+    !planCards
+  ) {
     return res.status(400).json({ message: "Insufficient info" });
   }
 
