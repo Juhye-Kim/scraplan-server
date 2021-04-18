@@ -23,6 +23,7 @@ const curationRouter = require("./routers/curation");
 const curationCardRouter = require("./routers/curation-card");
 const curationCardFeedbackRouter = require("./routers/curation-card-feedback");
 const planRouter = require("./routers/plan");
+const curationRequestRouter = require("./routers/curation-request");
 
 app.use("/sign", signRouter);
 app.use("/google-sign", googleSignRouter);
@@ -31,6 +32,7 @@ app.use("/curation", curationRouter);
 app.use("/curation-card", curationCardRouter);
 app.use("/curation-card-feedback", curationCardFeedbackRouter);
 app.use("/plan", planRouter);
+app.use("/curation-request", curationRequestRouter);
 
 app.get("/", (req, res) => {
   res.send("Scraplan server connected");
@@ -53,6 +55,11 @@ app.get(
   "/plan-cards/:planId",
   require("./middlewares/optionalTokenCheck"),
   require("./controllers/plan-card").get
+);
+app.get(
+  "/curation-requests/:email",
+  require("./middlewares/requiredTokenCheck"),
+  require("./controllers/curation-request").get
 );
 
 //HTTPS 서버 여는 코드

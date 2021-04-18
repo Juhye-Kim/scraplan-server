@@ -5,7 +5,13 @@
 
 module.exports = async (req, res, next) => {
   const { authorization } = req.headers;
-  const { email } = req.body;
+  let email;
+
+  if (req.body.email) {
+    email = req.body.email;
+  } else if (req.params.email) {
+    email = req.params.email;
+  }
 
   if (!authorization || !email) {
     return res.status(400).json({ message: "Insufficient info" });
