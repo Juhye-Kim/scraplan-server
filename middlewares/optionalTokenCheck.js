@@ -7,7 +7,7 @@ module.exports = async (req, res, next) => {
   const { authorization } = req.headers;
   let email;
 
-  if (email in req.body) {
+  if (req.body.email) {
     email = req.body.email;
   } else if (req.params.email) {
     email = req.params.email;
