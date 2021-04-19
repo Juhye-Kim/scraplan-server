@@ -1,4 +1,4 @@
-const { CurationRequest, User, sequelize } = require("../../models");
+const { CurationRequest } = require("../../models");
 const checkNumberType = require("../util/checkNumberType");
 
 module.exports = async (req, res) => {
