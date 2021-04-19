@@ -25,4 +25,5 @@ require("./plan/test.patch");
 require("./plan/test.delete");
 require("./plan-card/test.get");
 require("./curation-request/test.get");
+require("./curation-request/test.patch");
 require("./curation-request/test.post");
