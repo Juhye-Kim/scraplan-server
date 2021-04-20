@@ -173,7 +173,6 @@ describe("🔥GET /plan-cards", () => {
 
     //isValid와 isMember가 잘 나오는지 authorization정보를 누락, 비권한자, 소유자로 입력하여 값 확인
     //plan-cards가 정확히 일치하는지 확인
-    //mbr이 정상적으로 들어오는지 확인
     it("check non-members response isMember, isValid is false", (done) => {
       const path = `/${plans[0].result.id}`;
 
@@ -206,11 +205,24 @@ describe("🔥GET /plan-cards", () => {
       const req = {
         accessToken: users[0].result.latestToken,
       };
+      const originPlan = { ...plans[0].origin };
+      delete originPlan.UserId;
+      delete originPlan.planCards;
 
       reqFunc(url + path + query, "get", req, (err, res) => {
         res.should.have.status(200);
         res.body.should.have.property("isMember").eql(true);
         res.body.should.have.property("isValid").eql(true);
+        res.body.should.have.property("plan");
+        res.body.plan.should.have.property("title").eql(originPlan.title);
+        res.body.plan.should.have.property("desc").eql(originPlan.desc);
+        res.body.plan.should.have
+          .property("public")
+          .eql(originPlan.title ? 1 : 0);
+        res.body.plan.should.have.property("dayCount").eql(originPlan.dayCount);
+        res.body.plan.should.have
+          .property("representAddr")
+          .eql(originPlan.representAddr);
         checkResponseSameWithPlanCards(done, res);
       });
     });

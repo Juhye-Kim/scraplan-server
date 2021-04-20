@@ -11,7 +11,8 @@ module.exports = async (req, res) => {
 
   const isMember = authData && "id" in authData ? true : false;
   let planCards,
-    isValid = false;
+    isValid = false,
+    plan;
   // markers,
   // metadata;
 
@@ -48,14 +49,24 @@ module.exports = async (req, res) => {
       // FROM PlanCards WHERE PlanId = ${planId} GROUP BY day`;
       // [markers, metadata] = await sequelize.query(query, {});
 
-      if (isMember) {
-        const checkValid = await Plan.count({
-          where: { id: planId, UserId: authData.id },
-        });
-        if (checkValid === 1) {
-          isValid = true;
-        }
+      plan = await Plan.findOne({
+        attributes: [
+          "title",
+          "desc",
+          "public",
+          "dayCount",
+          "representAddr",
+          "UserId",
+        ],
+        where: { id: planId },
+        raw: true,
+      });
+
+      if (isMember && plan.UserId === authData.id) {
+        isValid = true;
       }
+
+      delete plan.UserId;
     });
   } catch (err) {
     if (err instanceof errorMessage) {
@@ -70,5 +81,5 @@ module.exports = async (req, res) => {
     }
   }
 
-  res.status(200).json({ isMember, isValid, planCards });
+  res.status(200).json({ isMember, isValid, plan, planCards });
 };
