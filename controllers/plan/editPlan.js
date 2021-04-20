@@ -51,7 +51,8 @@ module.exports = async (req, res) => {
               !comment ||
               checkNumberType("required", theme) ||
               !coordinates ||
-              !address
+              !address ||
+              Object.keys(planCard).length > 7 //입력값으로 들어오는 planCards의 각각의 값에 예상치 못한 키값이 있는지 검사.
             ) {
               throw new errorMessage(400, "Insufficient info");
             }
@@ -150,11 +151,9 @@ module.exports = async (req, res) => {
           return false;
         }
 
-        //기존 DB에 있는 값들과 주어진 값들이 일치하지 않을 경우에만 다음 과정을 진행
-        //비교값의 기준이 첫번째 인자인 origin이므로 planCards에 임의로 넣은 다른 키값들이 있으면 무시가 된다.
-        //즉 이 경우에는 PlanId, day, startTime, endTime, comment, theme, coordinates, address의 경우에만 같은지 검사를 하게 된다.
-        //요청 바디에서 위에 포함되지 않는 키값 데이터가 들어와도 무시가 된다는 것이다.
-        if (!checkSame(originPlanCard, planCards)) {
+        //요청으로 들어온 planCards를 기준으로 DB에 있는 값과 비교한다.
+        //planCards에 임의의 키 값들이 포함된 경우는 55번째 줄의 조건 검사로 걸러질 것이다.
+        if (!checkSame(planCards, originPlanCard)) {
           //planCard의 planId가 planId인 모든 항목 삭제.
           await PlanCard.destroy({ where: { PlanId: planId }, transaction: t });
 

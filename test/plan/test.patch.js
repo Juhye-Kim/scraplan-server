@@ -292,6 +292,9 @@ describe("🔥PATCH /plan", () => {
     it("check ignore wrong planCards-theme", (done) => {
       checkIgnoreWrongPlanCards([], { theme: "TEST" }, done);
     });
+    it("check ignore wrong planCards-theme", (done) => {
+      checkIgnoreWrongPlanCards([], { testAdditional: "TEST" }, done);
+    });
   });
 
   describe("👉check value changed with new data", () => {
@@ -330,7 +333,9 @@ describe("🔥PATCH /plan", () => {
                       newPlan[field]
                     );
                   } else if (field === "dayCount") {
-                    expect(resultPlan[field]).to.deep.eql(newPlanCard[0].day);
+                    expect(resultPlan[field]).to.deep.eql(
+                      newPlanCard[newPlanCard.length - 1].day
+                    );
                   } else {
                     expect(resultPlan[field]).to.deep.eql(newPlan[field]);
                   }
@@ -355,6 +360,19 @@ describe("🔥PATCH /plan", () => {
       checkChangedValue(["representAddr"], done);
     });
     it("check plan dayCount is changed by planCards", (done) => {
+      checkChangedValue(["planCards"], done);
+    });
+    it("check pass editional plancard", (done) => {
+      newPlanCard.push({
+        day: 7,
+        startTime: "14:00",
+        endTime: "16:45",
+        comment: "추가 테스트 파일",
+        theme: 5,
+        coordinates: [21, 30],
+        address: "추가시 추가동",
+      });
+      newPlan.planCards = encodeURIComponent(JSON.stringify(newPlanCard));
       checkChangedValue(["planCards"], done);
     });
   });
