@@ -375,5 +375,11 @@ describe("🔥PATCH /plan", () => {
       newPlan.planCards = encodeURIComponent(JSON.stringify(newPlanCard));
       checkChangedValue(["planCards"], done);
     });
+
+    it("check pass just delete one plancard", (done) => {
+      newPlanCard.pop();
+      newPlan.planCards = encodeURIComponent(JSON.stringify(newPlanCard));
+      checkChangedValue(["planCards"], done);
+    });
   });
 });

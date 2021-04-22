@@ -134,12 +134,19 @@ module.exports = async (req, res) => {
         });
 
         function checkSame(origin, target) {
-          if (Array.isArray(origin) && Array.isArray(target)) {
+          const originIsArray = Array.isArray(origin);
+          const targetIsArray = Array.isArray(target);
+          if (originIsArray && targetIsArray) {
             for (const [idx, el] of origin.entries()) {
               if (!checkSame(origin[idx], target[idx])) return false;
             }
             return true;
-          } else if (typeof origin === "object" && typeof target === "object") {
+          } else if (
+            typeof origin === "object" &&
+            !originIsArray &&
+            typeof target === "object" &&
+            !targetIsArray
+          ) {
             for (const key in origin) {
               if (!checkSame(origin[key], target[key])) return false;
             }
@@ -153,7 +160,10 @@ module.exports = async (req, res) => {
 
         //요청으로 들어온 planCards를 기준으로 DB에 있는 값과 비교한다.
         //planCards에 임의의 키 값들이 포함된 경우는 55번째 줄의 조건 검사로 걸러질 것이다.
-        if (!checkSame(planCards, originPlanCard)) {
+        if (
+          !checkSame(planCards, originPlanCard) &&
+          !checkSame(originPlanCard, planCards)
+        ) {
           //planCard의 planId가 planId인 모든 항목 삭제.
           await PlanCard.destroy({ where: { PlanId: planId }, transaction: t });
 
