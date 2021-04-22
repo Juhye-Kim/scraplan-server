@@ -298,54 +298,86 @@ describe("🔥PATCH /plan", () => {
   });
 
   describe("👉check value changed with new data", () => {
-    const checkChangedValue = (checkFields, done) => {
-      const req = {
-        planId: newPlan.planId,
-        accessToken: users[0].result.latestToken,
-        email: users[0].result.email,
-      };
-      for (const field of checkFields) {
-        req[field] = newPlan[field];
-      }
+    const checkChangedValue = async (checkFields, done) => {
+      try {
+        const req = {
+          planId: newPlan.planId,
+          // accessToken: users[0].result.latestToken,
+          email: users[0].result.email,
+        };
+        for (const field of checkFields) {
+          req[field] = newPlan[field];
+        }
 
-      Plan.findOne({
-        where: { id: newPlan.planId },
-        raw: true,
-      })
-        .then((originPlan) => {
-          reqFunc(url, "patch", req, (err, res) => {
+        const originPlan = await Plan.findOne({
+          where: { id: newPlan.planId },
+          raw: true,
+        });
+
+        await chai
+          .request(require("../../index"))
+          .patch(url)
+          .set({ authorization: `Bearer ${users[0].result.latestToken}` })
+          .send(req)
+          .then((res) => {
             res.should.have.status(200);
             res.body.should.have.property("message").eql("successfully edited");
-
-            Plan.findOne({
-              where: { id: newPlan.planId },
-              raw: true,
-            })
-              .then((resultPlan) => {
-                for (let field of checkFields) {
-                  if (field === "planCards") {
-                    field = "dayCount";
-                  }
-                  expect(originPlan[field]).to.not.deep.eql(resultPlan[field]);
-
-                  if (field === "public") {
-                    expect(resultPlan[field] === 0 ? false : true).to.deep.eql(
-                      newPlan[field]
-                    );
-                  } else if (field === "dayCount") {
-                    expect(resultPlan[field]).to.deep.eql(
-                      newPlanCard[newPlanCard.length - 1].day
-                    );
-                  } else {
-                    expect(resultPlan[field]).to.deep.eql(newPlan[field]);
-                  }
-                }
-                done();
-              })
-              .catch((err) => done(err));
           });
-        })
-        .catch((err) => done(err));
+
+        const resultPlan = await Plan.findOne({
+          where: { id: newPlan.planId },
+          raw: true,
+        });
+
+        for (let field of checkFields) {
+          if (field === "planCards") {
+            field = "dayCount";
+          }
+          expect(originPlan[field]).to.not.deep.eql(resultPlan[field]);
+
+          if (field === "public") {
+            expect(resultPlan[field] === 0 ? false : true).to.deep.eql(
+              newPlan[field]
+            );
+          } else if (field === "dayCount") {
+            const planCards = await PlanCard.findAll({
+              attributes: [
+                "day",
+                "startTime",
+                "endTime",
+                "comment",
+                "theme",
+                "coordinates",
+                "address",
+              ],
+              where: { PlanId: newPlan.planId },
+              raw: true,
+            });
+
+            expect(planCards.length).to.eql(newPlanCard.length);
+
+            for (const [index, planCard] of planCards.entries()) {
+              const { coordinates, ...planCardEl } = planCard;
+              const {
+                coordinates: reqCoordinates,
+                ...reqPlanCardEl
+              } = newPlanCard[index];
+
+              expect(coordinates.coordinates).to.deep.equal(reqCoordinates);
+              expect(planCardEl).to.deep.equal(reqPlanCardEl);
+            }
+
+            expect(resultPlan[field]).to.deep.eql(
+              newPlanCard[newPlanCard.length - 1].day
+            );
+          } else {
+            expect(resultPlan[field]).to.deep.eql(newPlan[field]);
+          }
+        }
+        done();
+      } catch (err) {
+        done(err);
+      }
     };
     it("check plan title is changed", (done) => {
       checkChangedValue(["title"], done);
@@ -363,15 +395,32 @@ describe("🔥PATCH /plan", () => {
       checkChangedValue(["planCards"], done);
     });
     it("check pass editional plancard", (done) => {
-      newPlanCard.push({
-        day: 7,
-        startTime: "14:00",
-        endTime: "16:45",
-        comment: "추가 테스트 파일",
-        theme: 5,
-        coordinates: [21, 30],
-        address: "추가시 추가동",
-      });
+      newPlanCard.push(
+        {
+          day: 7,
+          startTime: "14:00",
+          endTime: "16:45",
+          comment: "추가 테스트 파일",
+          theme: 5,
+          coordinates: [21, 30],
+          address: "추가시 추가동",
+        },
+        {
+          day: 10,
+          startTime: "14:00",
+          endTime: "16:45",
+          comment: "추가 테스트 파일",
+          theme: 5,
+          coordinates: [21, 30],
+          address: "추가시 추가동",
+        }
+      );
+      newPlan.planCards = encodeURIComponent(JSON.stringify(newPlanCard));
+      checkChangedValue(["planCards"], done);
+    });
+
+    it("check pass just delete one plancard", (done) => {
+      newPlanCard.pop();
       newPlan.planCards = encodeURIComponent(JSON.stringify(newPlanCard));
       checkChangedValue(["planCards"], done);
     });
