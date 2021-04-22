@@ -161,7 +161,7 @@ module.exports = async (req, res) => {
         //요청으로 들어온 planCards를 기준으로 DB에 있는 값과 비교한다.
         //planCards에 임의의 키 값들이 포함된 경우는 55번째 줄의 조건 검사로 걸러질 것이다.
         if (
-          !checkSame(planCards, originPlanCard) &&
+          !checkSame(planCards, originPlanCard) ||
           !checkSame(originPlanCard, planCards)
         ) {
           //planCard의 planId가 planId인 모든 항목 삭제.
